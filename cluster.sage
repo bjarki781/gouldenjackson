@@ -149,6 +149,8 @@ def sequence_odds(T, m, w, n):
 
     return odds.n()
 
+# calculate odds of each of the elements of T winning (a possibly extended) Penney's game
+# played with an m-sided die
 def all_odds(T, m=2):
     r = []
     # a guesstimate of terms needed to get an acceptably accurate answer
