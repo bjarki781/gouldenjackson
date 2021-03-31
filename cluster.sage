@@ -90,6 +90,7 @@ def penneysclustergf(T, s):
     n = B.nrows()
 
     ui = var('u' + str(s+1))
+    e = var('e')
 
     B = insert_row(B, n, zero_vector(n))
     B = insert_column(B, n, B.column(s+1)/ui)
@@ -97,7 +98,7 @@ def penneysclustergf(T, s):
     # n+1 since we added a column
     R = ~(Matrix.identity(n+1)-B)
 
-    return sum(R.row(0)[1:])
+    return R[0][n]
 
 # utility operations 
 def insert_row(M,k,row):
@@ -108,39 +109,51 @@ def insert_column(M,k,column):
 # the normal distribution of subwords
 # m is the size of the alphabet
 def dist(T, m):
-    Cw = penneysclustergf(T, s).substitute(submap)
-    C = clustergf(T).substitute(submap)
+    submap = {}
+    for i in range(0, len(T)):
+        submap.update({var('u'+str(i+1)):var('u'+str(i+1))-1})
+    C = clustergf(T)
+    M = 1 / (1-(m*x + C))
+    F = M.substitute(submap)
 
-    return 1/(1 - (m*x + C)).full_simplify()
+    return F
 
 # distribution of subwords that end in an unmarked word
 # m is the size of the alphabet
 def penneysdist(T, m, w):
     submap = {}
     for i in range(0, len(T)):
-        submap.update({var('u' + str(i+1)):-1})
-    Cw = penneysclustergf(T, w).substitute(submap)
-    C = clustergf(T).substitute(submap)
+        submap.update({var('u'+str(i+1)):var('u'+str(i+1))-1})
 
-    return (Cw/(1 -(m*x + C))).full_simplify()
+    C = clustergf(T)
+    Cw = penneysclustergf(T, w)
+    Mw = Cw / (1-(m*x + C))
+    Fw = Mw.substitute(submap)
+
+    return Fw
 
 
 # calculate the odds of T[w] winning penney's game
 # with an m-sided dice,
 # n is the amount of the terms expanded, higher n => more accuracy
 def sequence_odds(T, m, w, n):
-    ce = penneysdist(T, m, w).series(x, n).list()
-    pc = []
-    for i in range(0, len(ce)):
-        pc.append(ce[i]/m^i)
+    submap = {}
+    for i in range(0, len(T)):
+        submap.update({var('u'+str(i+1)):0})
 
-    return pc
+    Fsubbed = penneysdist(T, m, w).substitute(submap)
+    coefficients = Fsubbed.series(x, n).list()
+    odds = 0
+    for i in range(0, len(coefficients)):
+        odds += coefficients[i]/m^i
+
+    return odds.n()
 
 def all_odds(T, m=2):
     r = []
     # a guesstimate of terms needed to get an acceptably accurate answer
-    n = max(map(len, T))*5^m
+    n = 50
     for w in range(0, len(T)):
-        r.append(1 + sum(sequence_odds(T, m, w, n)).n())
+        r.append(sequence_odds(T, m, w, n))
     return r
 
