@@ -90,7 +90,6 @@ def penneysclustergf(T, s):
     n = B.nrows()
 
     ui = var('u' + str(s+1))
-    e = var('e')
 
     B = insert_row(B, n, zero_vector(n))
     B = insert_column(B, n, B.column(s+1)/ui)
@@ -98,6 +97,7 @@ def penneysclustergf(T, s):
     # n+1 since we added a column
     R = ~(Matrix.identity(n+1)-B)
 
+    # return only the paths to the winning word
     return R[0][n]
 
 # utility operations 
@@ -129,6 +129,10 @@ def penneysdist(T, m, w):
     Cw = penneysclustergf(T, w)
     Mw = Cw / (1-(m*x + C))
     Fw = Mw.substitute(submap)
+
+    print(latex(C.full_simplify()))
+    print(latex(Cw.full_simplify()))
+    print(latex(Mw.full_simplify()))
 
     return Fw
 
