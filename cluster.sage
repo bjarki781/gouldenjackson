@@ -14,6 +14,7 @@ def is_reduced(T):
                 return false
     return true
 
+
 # the weighted adjacency matrix of the words, how they can cluster together
 def wam(T):
     if not is_reduced(set(T)):
@@ -36,40 +37,44 @@ def wam(T):
         list.append(line)
     return matrix(list)
 
+
 # the matching operation used when calculation correlation between
 # two strings
-def match(p, q, i):
-    n = len(p)-i
-    if p[i:] == q[:n]:
+def match(w, v, i):
+    n = len(w)-i
+    if w[i:] == v[:n]:
         return true
     return false
 
+
 # defined as Omega in my text and in Guibas and Odzlyko PQ
-def correlation(p, q):
+def correlation(w, v):
     s = ""
-    for i in range(0, len(p)):
-        if match(p, q, i):
+    for i in range(0, len(w)):
+        if match(w, v, i):
             s += "1"
         else:
             s += "0"
     return s
 
+
 # my altered omega function, so we can cluster words of differing lengths
-def psi_x(p, q):
+def psi_x(w, v):
     monos = 0
-    om = correlation(p, q)
+    om = correlation(w, v)
     psi = ""
 
-    if len(p) < len(q):
-        zs = zero_string(len(q)-len(p)-1)
+    if len(w) < len(v):
+        zs = zero_string(len(v)-len(w)-1)
         psi = zs + om
-    elif len(p) >= len(q):
-        psi = om[len(p) - len(q)+1:]
+    elif len(w) >= len(v):
+        psi = om[len(w) - len(v)+1:]
 
     for i in range(0, len(psi)):
         if psi[i] == "1":
             monos += x^(i+1)
     return monos
+
 
 # utility function for psi_x
 def zero_string(n):
@@ -80,6 +85,7 @@ def zero_string(n):
         s += "0"
     return s
 
+
 # the normal cluster generating function
 def clustergf(T):
     B = wam(T)
@@ -87,6 +93,7 @@ def clustergf(T):
     R = ~(Matrix.identity(n)-B)
 
     return sum(R.row(0)[1:])
+
 
 # our altered cluster generating function, C_w in my text
 def penneysclustergf(T, s):
@@ -104,11 +111,13 @@ def penneysclustergf(T, s):
     # return only the paths to the winning word
     return R[0][n]
 
+
 # utility operations 
 def insert_row(M,k,row):
     return matrix(M.rows()[:k]+[row]+M.rows()[k:])
 def insert_column(M,k,column):
     return transpose(matrix(M.columns()[:k]+[column]+M.columns()[k:]))
+
 
 # the normal distribution of subwords
 # m is the size of the alphabet
@@ -121,6 +130,7 @@ def dist(T, m):
     F = M.substitute(submap)
 
     return F
+
 
 # distribution of subwords that end in an unmarked word
 # m is the size of the alphabet
@@ -138,7 +148,7 @@ def penneysdist(T, m, w):
 
 
 # calculate the odds of T[w] winning penney's game
-# with an m-sided dice,
+# with an m-sided die,
 # n is the amount of the terms expanded, higher n => more accuracy
 def sequence_odds(T, m, w, n):
     submap = {}
@@ -152,6 +162,7 @@ def sequence_odds(T, m, w, n):
         odds += coefficients[i]/m^i
 
     return odds.n()
+
 
 # calculate odds of each of the elements of T winning (a possibly extended) Penney's game
 # played with an m-sided die
