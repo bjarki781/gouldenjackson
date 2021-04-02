@@ -47,7 +47,7 @@ def match(p, q, i):
 # defined as Omega in my text and in Guibas and Odzlyko PQ
 def correlation(p, q):
     s = ""
-    for i in range(1, len(p)):
+    for i in range(0, len(p)):
         if match(p, q, i):
             s += "1"
         else:
@@ -56,22 +56,26 @@ def correlation(p, q):
 
 # my altered omega function, so we can cluster words of differing lengths
 def psi_x(p, q):
-    r = 0
-    om = correlation(p,q)
-    if len(p) < len(q):
-        zeros = zero_string(len(p)-len(q))
-        om = zeros + om
-    elif len(p) > len(q):
-        om = om[len(p) - len(q):]
+    monos = 0
+    om = correlation(p, q)
+    psi = ""
 
-    for i in range(0, len(om)):
-        if om[i] == "1":
-            r += x^(i+1)
-    return r
+    if len(p) < len(q):
+        zs = zero_string(len(q)-len(p)-1)
+        psi = zs + om
+    elif len(p) >= len(q):
+        psi = om[len(p) - len(q)+1:]
+
+    for i in range(0, len(psi)):
+        if psi[i] == "1":
+            monos += x^(i+1)
+    return monos
 
 # utility function for psi_x
 def zero_string(n):
     s = ""
+    if n < 0:
+        return "NEGATIVE N"
     for i in range(0, n):
         s += "0"
     return s
@@ -129,10 +133,6 @@ def penneysdist(T, m, w):
     Cw = penneysclustergf(T, w)
     Mw = Cw / (1-(m*x + C))
     Fw = Mw.substitute(submap)
-
-    print(latex(C.full_simplify()))
-    print(latex(Cw.full_simplify()))
-    print(latex(Mw.full_simplify()))
 
     return Fw
 
